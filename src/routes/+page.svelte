@@ -1,7 +1,119 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { writable } from 'svelte/store';
+	import HelpWindow from './help.svelte';
+
+	let rootnoteSelected = true;
+	let modeSelected = true;
+	let showChordBuilding = false;
+	let showHelpWindow = false;
+
+	const rootnote = writable('C');
+	const mode = writable('Ionian');
+
+	const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+	const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+	const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33F1', '#33FFF1', '#FFD700', '#8A2BE2'];
+
+	type Mode = 'Ionian' | 'Dorian' | 'Phrygian' | 'Lydian' | 'Mixolydian' | 'Aeolian' | 'Locrian' | 'Blues' | 'Jazz' | 'Harmonic Minor' | 'Melodic Minor' | 'Pentatonic Major' | 'Pentatonic Minor';
+    onMount(() => {
+        document.title = "Chordle - Interactive Chord Builder and Scale Finder";
+    });
+  
+	function getScaleNotes(root: string, mode: Mode): string[] {
+		const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+		const modeIntervals: Record<Mode, number[]> = {
+			'Ionian':           [0, 2, 4, 5, 7, 9, 11],
+			'Dorian':           [0, 2, 3, 5, 7, 9, 10],
+			'Phrygian':         [0, 1, 3, 5, 7, 8, 10],
+			'Lydian':           [0, 2, 4, 6, 7, 9, 11],
+			'Mixolydian':       [0, 2, 4, 5, 7, 9, 10],
+			'Aeolian':          [0, 2, 3, 5, 7, 8, 10],
+			'Locrian':          [0, 1, 3, 5, 6, 8, 10],
+			'Blues':            [0, 3, 5, 6, 7, 10],
+			'Jazz':             [0, 2, 3, 5, 7, 9, 10],
+			'Harmonic Minor':   [0, 2, 3, 5, 7, 8, 11],
+			'Melodic Minor':    [0, 2, 3, 5, 7, 9, 11],
+			'Pentatonic Major': [0, 2, 4, 7, 9],
+			'Pentatonic Minor': [0, 3, 5, 7, 10]
+		};
+		
+		const rootIndex = allNotes.indexOf(root);
+		return modeIntervals[mode].map(interval => allNotes[(rootIndex + interval) % 12]);
+	}
+
+	$: scaleNotes = getScaleNotes($rootnote, $mode as Mode);
+
+	function getChordNotes(scaleNotes: string[]): string[][] {
+		return scaleNotes.map((_, i) => {
+			return [
+				scaleNotes[i],
+				scaleNotes[(i + 2) % 7],
+				scaleNotes[(i + 4) % 7]
+			];
+		});
+	}
+
+	$: chordNotes = getChordNotes(scaleNotes);
+
+	function getChordBuilding(scaleNotes: string[]): string[] {
+		const chordTypes = ['Major', 'Minor', 'Minor', 'Major', 'Major', 'Minor', 'Diminished'];
+		return scaleNotes.map((note, i) => `${note} ${chordTypes[i]}: ${romanNumerals[i]} - ${romanNumerals[(i + 2) % 7]} - ${romanNumerals[(i + 4) % 7]}`);
+	}
+
+	$: chordBuilding = getChordBuilding(scaleNotes);
+
+	onMount(() => {
+		const rootnoteSelect = document.getElementById('rootnote') as HTMLSelectElement;
+		const modeSelect = document.getElementById('mode') as HTMLSelectElement;
+	
+		rootnoteSelect.value = $rootnote;
+		modeSelect.value = $mode;
+
+		rootnoteSelect.addEventListener('change', () => {
+			rootnoteSelected = true;
+			rootnote.set(rootnoteSelect.value);
+		});
+
+		modeSelect.addEventListener('change', () => {
+			modeSelected = true;
+			mode.set(modeSelect.value);
+		});
+	});
+
+	function toggleChordBuilding() {
+		showChordBuilding = !showChordBuilding;
+	}
+
+	function toggleHelpWindow() {
+		showHelpWindow = !showHelpWindow;
+	}
+
+	function getRandomElement<T>(arr: T[]): T {
+		return arr[Math.floor(Math.random() * arr.length)];
+	}
+
+	function selectRandomRootnoteAndMode() {
+		rootnote.set(getRandomElement(notes));
+		mode.set(getRandomElement(['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian', 'Blues', 'Jazz', 'Harmonic Minor', 'Melodic Minor', 'Pentatonic Major', 'Pentatonic Minor']));
+	}
+</script>
+
 <svelte:head>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Chordle is an interactive chord builder and scale finder. Explore musical scales, modes, and chords with this easy-to-use tool.">
+    <meta name="keywords" content="chord builder, scale finder, music theory, musical modes, chord progression">
+    <link rel="canonical" href="https://chordle.com">
+    <meta property="og:title" content="Chordle - Interactive Chord Builder and Scale Finder">
+    <meta property="og:description" content="Explore musical scales, modes, and chords with this easy-to-use interactive tool.">
+    <meta property="og:url" content="https://chordle.com">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Chordle - Interactive Chord Builder and Scale Finder">
+    <meta name="twitter:description" content="Explore musical scales, modes, and chords with this easy-to-use interactive tool.">
 </svelte:head>
+
 <style>
 	:global(body) {
 		background-image: url('$lib/backround.svg');
@@ -71,7 +183,7 @@
 		background-color: rgba(0, 0, 0, 0.6);
 		border-radius: 0.5rem;
 		margin: 0.3125rem;
-		box-shadow: 0 0.25rem 0.375rem rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.1);
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -115,6 +227,7 @@
 		margin: 0 auto 1.25rem;
 		width: 90%;
 		max-width: 25rem;
+		align-items: center;
 	}
 
 	.select-container select {
@@ -263,195 +376,129 @@
 	}
 
 	.footer a {
-		margin: 0 1rem;
-		color: #000000;
-		text-decoration: none;
-		display: flex;
-		align-items: center;
-	}
+		margin: 0
+    }
 
-	.footer a img {
-		margin-right: 0.5rem;
-		width: 1.5rem;
-		height: 1.5rem;
-	}
+.footer a {
+    margin: 0 1rem;
+    color: #000000;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.footer a img {
+    margin-right: 0.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+}
 </style>
-<script lang="ts">
-	import { onMount } from 'svelte';
-	import { writable } from 'svelte/store';
-	import HelpWindow from './help.svelte';
-
-	let rootnoteSelected = true;
-	let modeSelected = true;
-	let showChordBuilding = false;
-	let showHelpWindow = false;
-
-	const rootnote = writable('C');
-	const mode = writable('Ionian');
-
-	const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-	const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
-	const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33F1', '#33FFF1', '#FFD700', '#8A2BE2'];
-
-	type Mode = 'Ionian' | 'Dorian' | 'Phrygian' | 'Lydian' | 'Mixolydian' | 'Aeolian' | 'Locrian';
-    onMount(() => {
-        document.title = "Chordle";
-    });
-	function getScaleNotes(root: string, mode: Mode): string[] {
-		const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-		const modeIntervals: Record<Mode, number[]> = {
-			'Ionian':     [0, 2, 4, 5, 7, 9, 11],
-			'Dorian':     [0, 2, 3, 5, 7, 9, 10],
-			'Phrygian':   [0, 1, 3, 5, 7, 8, 10],
-			'Lydian':     [0, 2, 4, 6, 7, 9, 11],
-			'Mixolydian': [0, 2, 4, 5, 7, 9, 10],
-			'Aeolian':    [0, 2, 3, 5, 7, 8, 10],
-			'Locrian':    [0, 1, 3, 5, 6, 8, 10]
-		};
-		
-		const rootIndex = allNotes.indexOf(root);
-		return modeIntervals[mode].map(interval => allNotes[(rootIndex + interval) % 12]);
-	}
-
-	$: scaleNotes = getScaleNotes($rootnote, $mode as Mode);
-
-	function getChordNotes(scaleNotes: string[]): string[][] {
-		return scaleNotes.map((_, i) => {
-			return [
-				scaleNotes[i],
-				scaleNotes[(i + 2) % 7],
-				scaleNotes[(i + 4) % 7]
-			];
-		});
-	}
-
-	$: chordNotes = getChordNotes(scaleNotes);
-
-	function getChordBuilding(scaleNotes: string[]): string[] {
-		const chordTypes = ['Major', 'Minor', 'Minor', 'Major', 'Major', 'Minor', 'Diminished'];
-		return scaleNotes.map((note, i) => `${note} ${chordTypes[i]}: ${romanNumerals[i]} - ${romanNumerals[(i + 2) % 7]} - ${romanNumerals[(i + 4) % 7]}`);
-	}
-
-	$: chordBuilding = getChordBuilding(scaleNotes);
-
-	onMount(() => {
-		const rootnoteSelect = document.getElementById('rootnote') as HTMLSelectElement;
-		const modeSelect = document.getElementById('mode') as HTMLSelectElement;
-	
-		rootnoteSelect.value = $rootnote;
-		modeSelect.value = $mode;
-
-		rootnoteSelect.addEventListener('change', () => {
-			rootnoteSelected = true;
-			rootnote.set(rootnoteSelect.value);
-		});
-
-		modeSelect.addEventListener('change', () => {
-			modeSelected = true;
-			mode.set(modeSelect.value);
-		});
-	});
-
-	function toggleChordBuilding() {
-		showChordBuilding = !showChordBuilding;
-	}
-
-	function toggleHelpWindow() {
-		showHelpWindow = !showHelpWindow;
-	}
-</script>
 
 {#if showHelpWindow}
-	<HelpWindow />
-	<button class="toggle-button" style="position: fixed; top: 1rem; right: 1rem;" on:click={toggleHelpWindow}>
-		Back
-	</button>
+<HelpWindow />
+<button class="toggle-button" style="position: fixed; top: 1rem; right: 1rem;" on:click={toggleHelpWindow}>
+    Back
+</button>
 {:else}
-	<div class="d-flex flex-column align-items-center" style="margin-top: 3vh;">
-		<h1 class="headline">Chordle</h1>
-		<div class="select-container">
-			<select class="form-select" id="rootnote">
-				<option>C</option>
-				<option>C#</option>
-				<option>D</option>
-				<option>D#</option>
-				<option>E</option>
-				<option>F</option>
-				<option>F#</option>
-				<option>G</option>
-				<option>G#</option>
-				<option>A</option>
-				<option>A#</option>
-				<option>B</option>
-			</select>
-			<select class="form-select" id="mode">
-				<option>Ionian</option>
-				<option>Dorian</option>
-				<option>Phrygian</option>
-				<option>Lydian</option>
-				<option>Mixolydian</option>
-				<option>Aeolian</option>
-				<option>Locrian</option>
-			</select>
-		</div>
-	</div>
-	<div class="d-flex justify-content-center" style="margin-top: 2vh;">
-		<div class="card">
-			<div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 20vh;">
-				<h2 class="card-title">
-					{$rootnote} {$mode}
-				</h2>
-				<div class="note-container">
-					{#each scaleNotes as note, i}
-						<div class="note-item" style="--note-color: {colors[i]};">
-							<p class="note">{note}</p>
-							<p class="roman-numeral">{romanNumerals[i]}</p>
-						</div>
-					{/each}
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="d-flex justify-content-center" style="margin-top: 2vh;">
-		<div class="card">
-			<div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 20vh;">
-				<h2 class="card-title">Chord Notes</h2>
+<div class="d-flex flex-column align-items-center" style="margin-top: 3vh;">
+    <h1 class="headline">Chordle</h1>
+    <p class="lead text-center mb-4">Explore musical scales, modes, and build chords with this interactive tool.</p>
+    <div class="select-container">
+        <select class="form-select" id="rootnote">
+            <option>C</option>
+            <option>C#</option>
+            <option>D</option>
+            <option>D#</option>
+            <option>E</option>
+            <option>F</option>
+            <option>F#</option>
+            <option>G</option>
+            <option>G#</option>
+            <option>A</option>
+            <option>A#</option>
+            <option>B</option>
+        </select>
+        <select class="form-select" id="mode">
+            <option>Ionian</option>
+            <option>Dorian</option>
+            <option>Phrygian</option>
+            <option>Lydian</option>
+            <option>Mixolydian</option>
+            <option>Aeolian</option>
+            <option>Locrian</option>
+            <option>Blues</option>
+            <option>Jazz</option>
+            <option>Harmonic Minor</option>
+            <option>Melodic Minor</option>
+            <option>Pentatonic Major</option>
+            <option>Pentatonic Minor</option>
+        </select>
+        <span style="align-self: center;">or</span>
+        <button class="btn btn-primary" on:click={selectRandomRootnoteAndMode} style="display: flex; flex-direction: column;">
+       Random Scale
+        </button>
+    </div>
+</div>
+<div class="d-flex justify-content-center" style="margin-top: 2vh;">
+    <div class="card">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 20vh;">
+            <h2 class="card-title">
+                {$rootnote} {$mode}
+            </h2>
+            <div class="note-container">
+                {#each scaleNotes as note, i}
+                    <div class="note-item" style="--note-color: {colors[i]};">
+                        <p class="note">{note}</p>
+                        <p class="roman-numeral">{romanNumerals[i]}</p>
+                    </div>
+                {/each}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-center" style="margin-top: 2vh;">
+    <div class="card">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 20vh;">
+            <h2 class="card-title">Chord Notes</h2>
 
-				<div class="note-container">
-					{#each scaleNotes as note, i}
-						<div class="note-item" style="--note-color: {colors[i]};">
-							{#if showChordBuilding}
-								<div class="chord-info">
-									<p>{chordBuilding[i].split(':')[0]}</p>
-									<p>{chordBuilding[i].split(':')[1]}</p>
-								</div>
-							{:else}
-								{#each chordNotes[i].slice().reverse() as chordNote}
-									<p class="note">{chordNote}</p>
-								{/each}
-								<p class="roman-numeral">{romanNumerals[i]}</p>
-							{/if}
-						</div>
-					{/each}
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="footer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
-		<a href="https://www.instagram.com/HappyWachtelJuan" target="_blank" style="display: flex; align-items: center;">
-			<img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" style="width: 24px; height: 24px;">
-			<span style="margin-left: 0.5rem;">HappyWachtelJuan</span>
-		</a>
-		<a href="mailto:Juan.Wiegmann@web.de" style="display: flex; align-items: center;">
-			<div style="font-size: 24px;">&#128231</div>
-			<span style="margin-left: 0.5rem;">Juan.Wiegmann@web.de</span>
-		</a>
-		<a href="https://github.com/Zorroinvader" target="_blank" style="display: flex; align-items: center;">
-			<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="Github" style="width: 24px; height: 24px;">
-			<span style="margin-left: 0.5rem;">Zorroinvader</span>
-		</a>
-	</div>
-	<button class="toggle-button" style="position: fixed; top: 1rem; right: 1rem;" on:click={toggleHelpWindow}>
-		?
-	</button>
+            <div class="note-container">
+                {#each scaleNotes as note, i}
+                    <div class="note-item" style="--note-color: {colors[i]};">
+                        {#if showChordBuilding}
+                            <div class="chord-info">
+                                <p>{chordBuilding[i].split(':')[0]}</p>
+                                <p>{chordBuilding[i].split(':')[1]}</p>
+                            </div>
+                        {:else}
+                            {#each chordNotes[i].slice().reverse() as chordNote}
+                                <p class="note">{chordNote}</p>
+                            {/each}
+                            <p class="roman-numeral">{romanNumerals[i]}</p>
+                        {/if}
+                    </div>
+                {/each}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="footer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+    <a href="https://www.instagram.com/HappyWachtelJuan" target="_blank" style="display: flex; align-items: center;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" style="width: 24px; height: 24px;">
+        <span style="margin-left: 0.5rem;">HappyWachtelJuan</span>
+    </a>
+    <a>This is an Open Source Project :D</a>
+    <a href="https://github.com/Zorroinvader" target="_blank" style="display: flex; align-items: center;">
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="Github" style="width: 24px; height: 24px;">
+        <span style="margin-left: 0.5rem;">Zorroinvader</span>
+    </a>
+</div>
+<button class="toggle-button" style="position: fixed; top: 1rem; right: 1rem;" on:click={toggleHelpWindow}>
+    ?
+</button>
 {/if}
+
+<footer class="mt-5 pb-4">
+<div class="container">
+
+</div>
+</footer>
