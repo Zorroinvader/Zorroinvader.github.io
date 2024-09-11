@@ -79,7 +79,7 @@
 	}
 
 	.toggle-button {
-		position: absolute;
+		position: fixed;
 		top: 0.625rem;
 		right: 0.625rem;
 		z-index: 1;
@@ -254,14 +254,37 @@
 			font-size: 1.125rem;
 		}
 	}
+
+	.footer {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin-top: 2vh;
+	}
+
+	.footer a {
+		margin: 0 1rem;
+		color: #000000;
+		text-decoration: none;
+		display: flex;
+		align-items: center;
+	}
+
+	.footer a img {
+		margin-right: 0.5rem;
+		width: 1.5rem;
+		height: 1.5rem;
+	}
 </style>
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
+	import HelpWindow from './help.svelte';
 
 	let rootnoteSelected = true;
 	let modeSelected = true;
 	let showChordBuilding = false;
+	let showHelpWindow = false;
 
 	const rootnote = writable('C');
 	const mode = writable('Ionian');
@@ -271,7 +294,9 @@
 	const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33F1', '#33FFF1', '#FFD700', '#8A2BE2'];
 
 	type Mode = 'Ionian' | 'Dorian' | 'Phrygian' | 'Lydian' | 'Mixolydian' | 'Aeolian' | 'Locrian';
-
+    onMount(() => {
+        document.title = "Chordle";
+    });
 	function getScaleNotes(root: string, mode: Mode): string[] {
 		const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 		const modeIntervals: Record<Mode, number[]> = {
@@ -330,77 +355,103 @@
 	function toggleChordBuilding() {
 		showChordBuilding = !showChordBuilding;
 	}
+
+	function toggleHelpWindow() {
+		showHelpWindow = !showHelpWindow;
+	}
 </script>
 
-<div class="d-flex flex-column align-items-center" style="margin-top: 3vh;">
-    <h1 class="headline">Chordle</h1>
-    <div class="select-container">
-        <select class="form-select" id="rootnote">
-            <option>C</option>
-            <option>C#</option>
-            <option>D</option>
-            <option>D#</option>
-            <option>E</option>
-            <option>F</option>
-            <option>F#</option>
-            <option>G</option>
-            <option>G#</option>
-            <option>A</option>
-            <option>A#</option>
-            <option>B</option>
-        </select>
-        <select class="form-select" id="mode">
-            <option>Ionian</option>
-            <option>Dorian</option>
-            <option>Phrygian</option>
-            <option>Lydian</option>
-            <option>Mixolydian</option>
-            <option>Aeolian</option>
-            <option>Locrian</option>
-        </select>
-    </div>
-</div>
-<div class="d-flex justify-content-center" style="margin-top: 2vh;">
-	<div class="card">
-		<div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 20vh;">
-			<h2 class="card-title">
-				{$rootnote} {$mode}
-			</h2>
-			<div class="note-container">
-				{#each scaleNotes as note, i}
-					<div class="note-item" style="--note-color: {colors[i]};">
-						<p class="note">{note}</p>
-						<p class="roman-numeral">{romanNumerals[i]}</p>
-					</div>
-				{/each}
-			</div>
+{#if showHelpWindow}
+	<HelpWindow />
+	<button class="toggle-button" style="position: fixed; top: 1rem; right: 1rem;" on:click={toggleHelpWindow}>
+		Back
+	</button>
+{:else}
+	<div class="d-flex flex-column align-items-center" style="margin-top: 3vh;">
+		<h1 class="headline">Chordle</h1>
+		<div class="select-container">
+			<select class="form-select" id="rootnote">
+				<option>C</option>
+				<option>C#</option>
+				<option>D</option>
+				<option>D#</option>
+				<option>E</option>
+				<option>F</option>
+				<option>F#</option>
+				<option>G</option>
+				<option>G#</option>
+				<option>A</option>
+				<option>A#</option>
+				<option>B</option>
+			</select>
+			<select class="form-select" id="mode">
+				<option>Ionian</option>
+				<option>Dorian</option>
+				<option>Phrygian</option>
+				<option>Lydian</option>
+				<option>Mixolydian</option>
+				<option>Aeolian</option>
+				<option>Locrian</option>
+			</select>
 		</div>
 	</div>
-</div>
-<div class="d-flex justify-content-center" style="margin-top: 2vh;">
-	<div class="card">
-		<div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 20vh;">
-			<h2 class="card-title">Chord Notes</h2>
-			<button class="toggle-button" on:click={toggleChordBuilding}>
-				{showChordBuilding ? 'Show Scale' : 'Show Chord Building'}
-			</button>
-			<div class="note-container">
-				{#each scaleNotes as note, i}
-					<div class="note-item" style="--note-color: {colors[i]};">
-						{#if showChordBuilding}
-							<div class="chord-info">
-								<p>{chordBuilding[i].split(':')[0]}</p>
-								<p>{chordBuilding[i].split(':')[1]}</p>
-							</div>
-						{:else}
-							{#each chordNotes[i].slice().reverse() as chordNote}
-								<p class="note">{chordNote}</p>
-							{/each}
+	<div class="d-flex justify-content-center" style="margin-top: 2vh;">
+		<div class="card">
+			<div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 20vh;">
+				<h2 class="card-title">
+					{$rootnote} {$mode}
+				</h2>
+				<div class="note-container">
+					{#each scaleNotes as note, i}
+						<div class="note-item" style="--note-color: {colors[i]};">
+							<p class="note">{note}</p>
 							<p class="roman-numeral">{romanNumerals[i]}</p>
-						{/if}
-					</div>
-				{/each}
+						</div>
+					{/each}
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+	<div class="d-flex justify-content-center" style="margin-top: 2vh;">
+		<div class="card">
+			<div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 20vh;">
+				<h2 class="card-title">Chord Notes</h2>
+
+				<div class="note-container">
+					{#each scaleNotes as note, i}
+						<div class="note-item" style="--note-color: {colors[i]};">
+							{#if showChordBuilding}
+								<div class="chord-info">
+									<p>{chordBuilding[i].split(':')[0]}</p>
+									<p>{chordBuilding[i].split(':')[1]}</p>
+								</div>
+							{:else}
+								{#each chordNotes[i].slice().reverse() as chordNote}
+									<p class="note">{chordNote}</p>
+								{/each}
+								<p class="roman-numeral">{romanNumerals[i]}</p>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="footer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+		<a href="https://www.instagram.com/HappyWachtelJuan" target="_blank" style="display: flex; align-items: center;">
+			<img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" style="width: 24px; height: 24px;">
+			<span style="margin-left: 0.5rem;">HappyWachtelJuan</span>
+		</a>
+		<a href="mailto:Juan.Wiegmann@web.de" style="display: flex; align-items: center;">
+			<div style="font-size: 24px;">&#128231</div>
+			<span style="margin-left: 0.5rem;">Juan.Wiegmann@web.de</span>
+		</a>
+		<a href="https://github.com/Zorroinvader" target="_blank" style="display: flex; align-items: center;">
+			<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="Github" style="width: 24px; height: 24px;">
+			<span style="margin-left: 0.5rem;">Zorroinvader</span>
+		</a>
+	</div>
+	<button class="toggle-button" style="position: fixed; top: 1rem; right: 1rem;" on:click={toggleHelpWindow}>
+		?
+	</button>
+{/if}

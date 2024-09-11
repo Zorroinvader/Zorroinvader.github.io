@@ -1,38 +1,29 @@
-# create-svelte
+# Chordle
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+Chordle is an interactive tool for exploring musical scales, modes, and chords.
 
-## Creating a project
+## Welcome to Chordle
 
-If you're seeing this, you've probably already done this step. Congrats!
+### How to Use?
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+1. Select a root note from the first dropdown menu. This will be the starting note of your scale.
+2. Choose a mode from the second dropdown menu. This determines the pattern of intervals in your scale.
+3. The first card displays the scale notes based on your selections, along with their corresponding Roman numerals.
+4. The second card shows the chord notes for each degree of the scale.
+5. Click the toggle button in the second card to switch between viewing chord notes and chord building information.
+6. Experiment with different root notes and modes to explore various scales and their corresponding chords.
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+### Why Chordle?
 
-## Developing
+- **Music Theory Learning:** Chordle helps you visualize and understand the relationship between scales, modes, and chords.
+- **Composition Tool:** Use it to find interesting chord progressions or to understand the harmonic structure of different modes.
+- **Practice Aid:** For musicians, it's a quick reference to see scale degrees and chord constructions in any key or mode.
+- **Exploration:** Discover how changing the root note or mode affects the resulting scale and chords.
+- **Accessibility:** Provides an easy-to-use interface for both beginners and advanced musicians to explore music theory concepts.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Whether you're a beginner learning music theory, a composer looking for inspiration, or an experienced musician wanting a quick reference, Chordle is designed to be your go-to tool for exploring scales and chords across different modes and keys.
 
-```bash
-npm run dev
+_________
+## Have Fun!
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+We hope Chordle helps you in your musical journey. Enjoy exploring the world of scales and chords!
