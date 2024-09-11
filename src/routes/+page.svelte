@@ -1,3 +1,4 @@
+<meta name="theme-color" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -100,6 +101,7 @@
 </script>
 
 <svelte:head>
+    <meta name="theme-color" content="#000000">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Chordle is an interactive chord builder and scale finder. Explore musical scales, modes, and chords with this easy-to-use tool.">
@@ -241,7 +243,7 @@
 		}
 
 		.select-container select {
-			font-size: 0.875rem;
+			font-size: 1.125rem; /* Increased font size */
 			padding: 0.375rem;
 		}
 	}
@@ -318,6 +320,15 @@
 		.note-item {
 			flex: 0 0 calc(25% - 0.625rem);
 		}
+		.note {
+			font-size: 1.25rem; /* Increased font size */
+		}
+		.roman-numeral {
+			font-size: 1rem; /* Increased font size */
+		}
+		.card-title {
+			font-size: 1.75rem; /* Increased font size */
+		}
 	}
 
 	@media (max-width: 30rem) {
@@ -333,6 +344,15 @@
 		.select-container .form-select {
 			width: 100%;
 			margin-bottom: 0.625rem;
+		}
+		.note {
+			font-size: 1.375rem; /* Increased font size */
+		}
+		.roman-numeral {
+			font-size: 1.125rem; /* Increased font size */
+		}
+		.card-title {
+			font-size: 2rem; /* Increased font size */
 		}
 	}
 
